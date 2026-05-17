@@ -6,5 +6,6 @@
 - [완료] PostgreSQL Docker 컨테이너 연결 확인
 - [완료] 프로젝트 디렉토리 구조 재구성
 - [완료] CLAUDE.md 작성
-- [진행중] ontology/ 파일 작성
+- [완료] ontology/ 파일 작성
+- [완료] Member 엔티티 생성 (domain/member/entity/Member.java) + @EnableJpaAuditing 적용
 - [대기] Git 초기화 + GitHub 연결
