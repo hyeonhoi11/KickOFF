@@ -1,0 +1,10 @@
+# KickOFF 진행 로그
+
+## 2026-05-17
+- [완료] 개발환경 세팅 (Java, Git, Docker, Node, Flutter, Claude Code)
+- [완료] Spring Boot 3.4.5 프로젝트 생성
+- [완료] PostgreSQL Docker 컨테이너 연결 확인
+- [완료] 프로젝트 디렉토리 구조 재구성
+- [완료] CLAUDE.md 작성
+- [진행중] ontology/ 파일 작성
+- [대기] Git 초기화 + GitHub 연결
