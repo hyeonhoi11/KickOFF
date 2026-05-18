@@ -7,6 +7,7 @@ spring:
     password: kickoff1234
     driver-class-name: org.postgresql.Driver
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update
     show-sql: true
@@ -17,3 +18,8 @@ spring:
 
 server:
   port: 8080
+
+jwt:
+  secret: kickoff-secret-key-for-jwt-token-signing-must-be-long-enough
+  access-token-expiration: 3600000
+  refresh-token-expiration: 1209600000
