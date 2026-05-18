@@ -4,6 +4,7 @@ import com.kickoff.kickoff.domain.member.dto.*;
 import com.kickoff.kickoff.domain.member.entity.Member;
 import com.kickoff.kickoff.domain.member.repository.MemberRepository;
 import com.kickoff.kickoff.global.jwt.JwtProvider;
+import com.kickoff.kickoff.global.redis.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public SignupResponse signup(SignupRequest request) {
@@ -40,13 +42,37 @@ public class MemberService {
         }
         String accessToken = jwtProvider.generateAccessToken(member.getId(), member.getEmail());
         String refreshToken = jwtProvider.generateRefreshToken(member.getId());
-        // TODO: Redis에 Refresh Token 저장 (key: memberId, value: refreshToken)
+        refreshTokenService.save(member.getId(), refreshToken);
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .memberId(member.getId())
                 .name(member.getName())
                 .build();
+    }
+
+    @Transactional
+    public LoginResponse reissue(String refreshToken) {
+        Long memberId = jwtProvider.getMemberIdFromToken(refreshToken);
+        if (!refreshTokenService.validate(memberId, refreshToken)) {
+            throw new IllegalArgumentException("유효하지 않은 Refresh Token입니다.");
+        }
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        String newAccessToken = jwtProvider.generateAccessToken(member.getId(), member.getEmail());
+        String newRefreshToken = jwtProvider.generateRefreshToken(member.getId());
+        refreshTokenService.save(member.getId(), newRefreshToken);
+        return LoginResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .memberId(member.getId())
+                .name(member.getName())
+                .build();
+    }
+
+    public void logout(String accessToken) {
+        Long memberId = jwtProvider.getMemberIdFromToken(accessToken);
+        refreshTokenService.delete(memberId);
     }
 
     @Transactional(readOnly = true)

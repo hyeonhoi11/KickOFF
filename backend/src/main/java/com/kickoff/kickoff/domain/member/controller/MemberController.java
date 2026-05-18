@@ -33,6 +33,18 @@ public class MemberController {
         return ResponseEntity.ok(memberService.getMyInfo(memberId));
     }
 
-    // TODO: POST /reissue - Refresh Token으로 Access Token 재발급
-    // TODO: POST /logout - Redis에서 Refresh Token 삭제 후 응답
+    @PostMapping("/reissue")
+    public ResponseEntity<LoginResponse> reissue(
+            @RequestHeader("Authorization") String authorizationHeader) {
+        String refreshToken = authorizationHeader.substring(7);
+        return ResponseEntity.ok(memberService.reissue(refreshToken));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @RequestHeader("Authorization") String authorizationHeader) {
+        String accessToken = authorizationHeader.substring(7);
+        memberService.logout(accessToken);
+        return ResponseEntity.ok().build();
+    }
 }
