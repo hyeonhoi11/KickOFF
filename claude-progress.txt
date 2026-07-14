@@ -6,5 +6,16 @@
 - [완료] PostgreSQL Docker 컨테이너 연결 확인
 - [완료] 프로젝트 디렉토리 구조 재구성
 - [완료] CLAUDE.md 작성
-- [진행중] ontology/ 파일 작성
+- [완료] ontology/ 파일 작성
+- [완료] Member 엔티티 생성 (domain/member/entity/Member.java) + @EnableJpaAuditing 적용
 - [대기] Git 초기화 + GitHub 연결
+
+## 2026-07-14
+- [완료] Team 도메인 2차 구현 (docs/api-team.md API 5, 6)
+  - TeamInvitation 엔티티 신규 생성 (id, team, code(unique, 8자 영대문자+숫자), expiresAt(발급+7일), createdAt)
+  - TeamInvitationRepository 신규 생성 (findByCode, existsByCode)
+  - TeamService: createInvitation(초대 코드 발급, MANAGER 권한만, R06), joinTeamByInvitation(초대 코드로 팀 합류, PLAYER 역할 자동 부여, R11) 메서드 추가
+  - TeamController: POST /api/v1/teams/{teamId}/invitations, POST /api/v1/teams/invitations/join 엔드포인트 추가
+  - 신규 예외: InvitationNotFoundException(404), ExpiredInvitationException(400), AlreadyJoinedTeamException(409) — 모두 BusinessException 상속
+  - MANAGER 권한 없을 시 기존 TeamAccessDeniedException(403) 재사용
+  - ./gradlew clean build -x test 성공 확인
