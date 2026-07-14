@@ -4,6 +4,9 @@ import com.kickoff.kickoff.domain.team.dto.MyTeamResponse;
 import com.kickoff.kickoff.domain.team.dto.TeamCreateRequest;
 import com.kickoff.kickoff.domain.team.dto.TeamCreateResponse;
 import com.kickoff.kickoff.domain.team.dto.TeamDetailResponse;
+import com.kickoff.kickoff.domain.team.dto.TeamInvitationResponse;
+import com.kickoff.kickoff.domain.team.dto.TeamJoinRequest;
+import com.kickoff.kickoff.domain.team.dto.TeamJoinResponse;
 import com.kickoff.kickoff.domain.team.dto.TeamMemberResponse;
 import com.kickoff.kickoff.domain.team.service.TeamService;
 import com.kickoff.kickoff.global.jwt.JwtProvider;
@@ -54,5 +57,23 @@ public class TeamController {
         String token = authorizationHeader.substring(7);
         Long memberId = jwtProvider.getMemberIdFromToken(token);
         return ResponseEntity.ok(teamService.getTeamMembers(memberId, teamId));
+    }
+
+    @PostMapping("/{teamId}/invitations")
+    public ResponseEntity<TeamInvitationResponse> createInvitation(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long teamId) {
+        String token = authorizationHeader.substring(7);
+        Long memberId = jwtProvider.getMemberIdFromToken(token);
+        return ResponseEntity.ok(teamService.createInvitation(memberId, teamId));
+    }
+
+    @PostMapping("/invitations/join")
+    public ResponseEntity<TeamJoinResponse> joinTeamByInvitation(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody TeamJoinRequest request) {
+        String token = authorizationHeader.substring(7);
+        Long memberId = jwtProvider.getMemberIdFromToken(token);
+        return ResponseEntity.ok(teamService.joinTeamByInvitation(memberId, request));
     }
 }

@@ -47,7 +47,7 @@ Notice에 달리는 응답.
 
 ## 제약 규칙
 R02: Participation은 Event 생성 시 자동 생성 (PENDING)
-R06: MANAGER만 Event/Notice 생성·수정·삭제 가능
+R06: MANAGER만 Event/Notice/TeamInvitation 생성·수정·삭제 가능
 R07: Member는 하나 이상의 Team에 속할 수 있음 (N:M)
 R09: 스코어는 Match 상태가 COMPLETED일 때만 유효
 R10: Team 내 역할(MANAGER/PLAYER)은 Team별로 독립 부여
