@@ -3,6 +3,10 @@ package com.kickoff.kickoff.domain.member.service;
 import com.kickoff.kickoff.domain.member.dto.*;
 import com.kickoff.kickoff.domain.member.entity.Member;
 import com.kickoff.kickoff.domain.member.repository.MemberRepository;
+import com.kickoff.kickoff.global.exception.DuplicateEmailException;
+import com.kickoff.kickoff.global.exception.InvalidCredentialsException;
+import com.kickoff.kickoff.global.exception.InvalidTokenException;
+import com.kickoff.kickoff.global.exception.MemberNotFoundException;
 import com.kickoff.kickoff.global.jwt.JwtProvider;
 import com.kickoff.kickoff.global.redis.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +26,7 @@ public class MemberService {
     @Transactional
     public SignupResponse signup(SignupRequest request) {
         if (memberRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            throw new DuplicateEmailException();
         }
         Member member = Member.builder()
                 .email(request.getEmail())
@@ -36,9 +40,9 @@ public class MemberService {
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
         Member member = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
+                .orElseThrow(InvalidCredentialsException::new);
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+            throw new InvalidCredentialsException();
         }
         String accessToken = jwtProvider.generateAccessToken(member.getId(), member.getEmail());
         String refreshToken = jwtProvider.generateRefreshToken(member.getId());
@@ -55,10 +59,10 @@ public class MemberService {
     public LoginResponse reissue(String refreshToken) {
         Long memberId = jwtProvider.getMemberIdFromToken(refreshToken);
         if (!refreshTokenService.validate(memberId, refreshToken)) {
-            throw new IllegalArgumentException("유효하지 않은 Refresh Token입니다.");
+            throw new InvalidTokenException();
         }
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(MemberNotFoundException::new);
         String newAccessToken = jwtProvider.generateAccessToken(member.getId(), member.getEmail());
         String newRefreshToken = jwtProvider.generateRefreshToken(member.getId());
         refreshTokenService.save(member.getId(), newRefreshToken);
@@ -78,7 +82,7 @@ public class MemberService {
     @Transactional(readOnly = true)
     public MemberInfoResponse getMyInfo(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(MemberNotFoundException::new);
         return MemberInfoResponse.from(member);
     }
 }
